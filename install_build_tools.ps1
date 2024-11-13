@@ -99,12 +99,22 @@ try {
 }
 
 # Check if Visual Studio Build Tools is already installed
-$vsInstallPath = Join-Path $InstallPath "vs2022_buildtools"
-if (Test-Path $vsInstallPath) {
-    Write-Host "Visual Studio Build Tools 2022 is already installed at $vsInstallPath." -ForegroundColor Green
-} else {
+try {
+    # Try to find MSBuild in the system
+    $msbuildPath = (Get-Command msbuild.exe -ErrorAction Stop).Source
+    if ($msbuildPath) {
+        $vsInstallRoot = Split-Path (Split-Path (Split-Path $msbuildPath -Parent) -Parent) -Parent
+        Write-Host "Visual Studio Build Tools is already installed at: $vsInstallRoot" -ForegroundColor Green
+        $vsInstalled = $true
+    }
+} catch {
+    $vsInstalled = $false
+}
+
+if (-not $vsInstalled) {
     # Download VS Build Tools installer
     Write-Host "Downloading Visual Studio Build Tools installer..." -ForegroundColor Cyan
+    $vsInstallPath = Join-Path $InstallPath "vs2022_buildtools"
     $exePath = Join-Path $InstallPath "vs_buildtools.exe"
     Invoke-WebRequest -Uri 'https://aka.ms/vs/17/release/vs_BuildTools.exe' -UseBasicParsing -OutFile $exePath
 
@@ -128,6 +138,16 @@ if (Test-Path $vsInstallPath) {
     # Check VS Build Tools installation result
     if ($process.ExitCode -eq 0) {
         Write-Host "Visual Studio Build Tools installation completed successfully" -ForegroundColor Green
+        
+        # Add to PATH if not already present
+        $vsPath = Join-Path $vsInstallPath "Common7\Tools"
+        if ($env:Path -notlike "*$vsPath*") {
+            [Environment]::SetEnvironmentVariable(
+                'Path',
+                "$([Environment]::GetEnvironmentVariable('Path', 'Machine'));$vsPath",
+                'Machine'
+            )
+        }
     } else {
         Write-Host "Visual Studio Build Tools installation failed with exit code: $($process.ExitCode)" -ForegroundColor Red
     }
