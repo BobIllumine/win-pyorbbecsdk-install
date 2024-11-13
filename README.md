@@ -9,6 +9,13 @@ This repository contains PowerShell scripts for installing build tools and cloni
 
 ## Usage
 
+**WARNING!** In order to run the scripts you need to run PowerShell as Administrator and enable unrestricted script execution. Generally, this is VERY unsafe and has to be done in a controlled environment.
+
+Before proceeding, run the following command to enable unrestricted script execution:
+```powershell
+Set-ExecutionPolicy Unrestricted -Scope CurrentUser
+```
+
 1. Clone the repository:
    ```powershell
    git clone https://github.com/BobIllumine/win-pyorbbecsdk-install.git
