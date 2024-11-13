@@ -11,12 +11,12 @@ This repository contains PowerShell scripts for installing build tools and cloni
 
 1. Clone the repository:
    ```powershell
-   git clone https://github.com/your-username/pyorbbecsdk-build-scripts.git
+   git clone https://github.com/BobIllumine/win-pyorbbecsdk-install.git
    ```
    Or download the zip file and extract it.
 2. Navigate to the repository directory:
    ```powershell
-   cd pyorbbecsdk-build-scripts
+   cd win-pyorbbecsdk-install
    ```
 3. Run the script to install build tools and clone the PyOrbbec SDK repository:
    ```powershell
