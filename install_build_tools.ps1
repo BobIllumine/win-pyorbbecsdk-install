@@ -32,7 +32,7 @@ try {
     }
 } catch {
     Write-Host "Downloading Git..." -ForegroundColor Cyan
-    $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.47.0.windows.2/Git-2.47.0.2-32-bit.exe"
+    $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.47.0.windows.2/Git-2.47.0.2-64-bit.exe"
     $gitInstaller = Join-Path $InstallPath "git_installer.exe"
     Invoke-WebRequest -Uri $gitUrl -OutFile $gitInstaller
 
