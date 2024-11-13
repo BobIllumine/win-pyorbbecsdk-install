@@ -111,11 +111,16 @@ try {
 } catch {
     # Try alternative registry path for Build Tools
     try {
-        $vsRegPath = "HKLM:\SOFTWARE\Microsoft\MSBuild\ToolsVersions\Current\MSBuild"
-        $vsInstallPath = Get-ItemProperty -Path $vsRegPath -ErrorAction Stop | Select-Object -ExpandProperty InstallPath
-        if ($vsInstallPath) {
-            Write-Host "Visual Studio Build Tools is already installed at: $vsInstallPath" -ForegroundColor Green
-            $vsInstalled = $true
+        # Get all MSBuild ToolsVersions keys
+        $msbuildKeys = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\MSBuild\ToolsVersions" -ErrorAction Stop
+        if ($msbuildKeys) {
+            # Take the first available version
+            $vsRegPath = $msbuildKeys[0].PSPath
+            $vsInstallPath = Get-ItemProperty -Path $vsRegPath -ErrorAction Stop | Select-Object -ExpandProperty MSBuildToolsPath
+            if ($vsInstallPath) {
+                Write-Host "Visual Studio Build Tools is already installed at: $vsInstallPath" -ForegroundColor Green
+                $vsInstalled = $true
+            }
         }
     } catch {
         $vsInstalled = $false
