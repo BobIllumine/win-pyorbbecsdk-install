@@ -1,6 +1,10 @@
+param (
+    [string]$InstallPath = (Join-Path $PWD.Path "pyorbbecsdk")
+)
+
 # Create working directory
-New-Item -ItemType Directory -Path 'C:\software\pyorbbecsdk' -Force
-Set-Location -Path 'C:\software\pyorbbecsdk'
+New-Item -ItemType Directory -Path $InstallPath -Force
+Set-Location -Path $InstallPath
 
 # Clone the repository
 Write-Host "Cloning pyorbbecsdk repository..." -ForegroundColor Cyan
@@ -18,32 +22,25 @@ Set-Location -Path 'build'
 # Configure CMake project
 Write-Host "Configuring CMake project..." -ForegroundColor Cyan
 $cmakeArgs = @(
-    '-G', 'Visual Studio 17 2022',
+    '-G', '"Visual Studio 17 2022"',
     '-A', 'x64',
     '..'
 )
-Start-Process -FilePath 'cmake' -ArgumentList $cmakeArgs -NoNewWindow -Wait
+cmake @cmakeArgs
 
 # Build the project
 Write-Host "Building project..." -ForegroundColor Cyan
-$buildArgs = @(
-    '--build', '.',
-    '--config', 'Release'
-)
-Start-Process -FilePath 'cmake' -ArgumentList $buildArgs -NoNewWindow -Wait
+cmake --build . --config Release
 
 # Install the built package
 Write-Host "Installing built package..." -ForegroundColor Cyan
-$installArgs = @(
-    '--build', '.',
-    '--target', 'INSTALL',
-    '--config', 'Release'
-)
-Start-Process -FilePath 'cmake' -ArgumentList $installArgs -NoNewWindow -Wait
+cmake --build . --target INSTALL --config Release
 
 # Copy necessary files to examples directory
 Write-Host "Copying files to examples directory..." -ForegroundColor Cyan
-Copy-Item -Path "install/lib/*" -Destination "../examples/" -Recurse -Force
+if (Test-Path "install/lib") {
+    Copy-Item -Path "install/lib/*" -Destination "../examples/" -Recurse -Force
+}
 
 # Return to original directory
 Set-Location -Path '..'
