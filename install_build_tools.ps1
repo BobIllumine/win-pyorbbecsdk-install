@@ -32,7 +32,7 @@ try {
     }
 } catch {
     Write-Host "Downloading Git..." -ForegroundColor Cyan
-    $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.44.0.windows.1/Git-2.44.0-64-bit.exe"
+    $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.47.0.windows.2/Git-2.47.0.2-32-bit.exe"
     $gitInstaller = Join-Path $InstallPath "git_installer.exe"
     Invoke-WebRequest -Uri $gitUrl -OutFile $gitInstaller
 
@@ -99,16 +99,27 @@ try {
 }
 
 # Check if Visual Studio Build Tools is already installed
+$vsInstalled = $false
 try {
-    # Try to find MSBuild in the system
-    $msbuildPath = (Get-Command msbuild.exe -ErrorAction Stop).Source
-    if ($msbuildPath) {
-        $vsInstallRoot = Split-Path (Split-Path (Split-Path $msbuildPath -Parent) -Parent) -Parent
-        Write-Host "Visual Studio Build Tools is already installed at: $vsInstallRoot" -ForegroundColor Green
+    # Check Windows Registry for Visual Studio Build Tools
+    $vsRegPath = "HKLM:\SOFTWARE\Microsoft\VisualStudio\Setup\Community"
+    $vsInstallPath = Get-ItemProperty -Path $vsRegPath -ErrorAction Stop | Select-Object -ExpandProperty InstallPath
+    if ($vsInstallPath) {
+        Write-Host "Visual Studio Build Tools is already installed at: $vsInstallPath" -ForegroundColor Green
         $vsInstalled = $true
     }
 } catch {
-    $vsInstalled = $false
+    # Try alternative registry path for Build Tools
+    try {
+        $vsRegPath = "HKLM:\SOFTWARE\Microsoft\VisualStudio\Setup\BuildTools"
+        $vsInstallPath = Get-ItemProperty -Path $vsRegPath -ErrorAction Stop | Select-Object -ExpandProperty InstallPath
+        if ($vsInstallPath) {
+            Write-Host "Visual Studio Build Tools is already installed at: $vsInstallPath" -ForegroundColor Green
+            $vsInstalled = $true
+        }
+    } catch {
+        $vsInstalled = $false
+    }
 }
 
 if (-not $vsInstalled) {
