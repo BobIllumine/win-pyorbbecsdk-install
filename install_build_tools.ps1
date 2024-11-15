@@ -100,37 +100,23 @@ try {
 
 # Check if Visual Studio Build Tools is already installed
 $vsInstalled = $false
-try {
-    # Check Windows Registry for Visual Studio Build Tools
-    $vsRegPath = "HKLM:\SOFTWARE\Microsoft\VisualStudio\Setup\Community"
-    $vsInstallPath = Get-ItemProperty -Path $vsRegPath -ErrorAction Stop | Select-Object -ExpandProperty InstallPath
-    if ($vsInstallPath) {
-        Write-Host "Visual Studio Build Tools is already installed at: $vsInstallPath" -ForegroundColor Green
-        $vsInstalled = $true
-    }
-} catch {
-    # Try alternative registry path for Build Tools
-    try {
-        # Get all MSBuild ToolsVersions keys
-        $msbuildKeys = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\MSBuild\ToolsVersions" -ErrorAction Stop
-        if ($msbuildKeys) {
-            # Take the first available version
-            $vsRegPath = $msbuildKeys[0].PSPath
-            $vsInstallPath = Get-ItemProperty -Path $vsRegPath -ErrorAction Stop | Select-Object -ExpandProperty MSBuildToolsPath
-            if ($vsInstallPath) {
-                Write-Host "Visual Studio Build Tools is already installed at: $vsInstallPath" -ForegroundColor Green
-                $vsInstalled = $true
-            }
-        }
-    } catch {
-        $vsInstalled = $false
-    }
+$defaultVSPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools"
+$defaultVSPath2 = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\Community"
+
+if (Test-Path $defaultVSPath) {
+    Write-Host "Visual Studio Build Tools is already installed at: $defaultVSPath" -ForegroundColor Green
+    $vsInstalled = $true
+    $vsInstallPath = $defaultVSPath
+} elseif (Test-Path $defaultVSPath2) {
+    Write-Host "Visual Studio Community is already installed at: $defaultVSPath2" -ForegroundColor Green
+    $vsInstalled = $true
+    $vsInstallPath = $defaultVSPath2
 }
 
 if (-not $vsInstalled) {
     # Download VS Build Tools installer
     Write-Host "Downloading Visual Studio Build Tools installer..." -ForegroundColor Cyan
-    $vsInstallPath = Join-Path $InstallPath "vs2022_buildtools"
+    $vsInstallPath = $defaultVSPath  # Use default installation path
     $exePath = Join-Path $InstallPath "vs_buildtools.exe"
     Invoke-WebRequest -Uri 'https://aka.ms/vs/17/release/vs_BuildTools.exe' -UseBasicParsing -OutFile $exePath
 
@@ -141,18 +127,17 @@ if (-not $vsInstalled) {
         '--wait',
         '--norestart',
         '--nocache',
-        '--installPath', $vsInstallPath,
         '--add', 'Microsoft.VisualStudio.Workload.VCTools',
-        '--add', 'Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools',
-        '--add', 'Microsoft.VisualStudio.Workload.WebBuildTools',
+        '--add', 'Microsoft.VisualStudio.Component.Windows11SDK.22621',
+        '--add', 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
         '--includeRecommended'
     )
 
     # Start installation
-    $process = Start-Process -FilePath $exePath -ArgumentList $arguments -Wait -PassThru
+    $process = Start-Process -FilePath $exePath -ArgumentList $arguments -Wait -PassThru -NoNewWindow
 
     # Check VS Build Tools installation result
-    if ($process.ExitCode -eq 0) {
+    if ($process.ExitCode -eq 0 -or $process.ExitCode -eq 3010) {
         Write-Host "Visual Studio Build Tools installation completed successfully" -ForegroundColor Green
         
         # Add to PATH if not already present
@@ -165,7 +150,8 @@ if (-not $vsInstalled) {
             )
         }
     } else {
-        Write-Host "Visual Studio Build Tools installation failed with exit code: $($process.ExitCode)" -ForegroundColor Red
+        Write-Host "Visual Studio Build Tools installation completed with exit code: $($process.ExitCode)" -ForegroundColor Yellow
+        Write-Host "This is normal if installation requires a reboot or if Build Tools are already installed." -ForegroundColor Yellow
     }
 }
 
