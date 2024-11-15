@@ -21,9 +21,28 @@ Set-Location -Path 'build'
 
 # Configure CMake project
 Write-Host "Configuring CMake project..." -ForegroundColor Cyan
+
+# Get Python installation path from AppData
+$pythonRoot = Join-Path $env:LOCALAPPDATA "Programs\Python\Python311"
+if (-not (Test-Path $pythonRoot)) {
+    Write-Host "Python installation not found in AppData. Checking system path..." -ForegroundColor Yellow
+    $pythonPath = (Get-Command python).Source
+    $pythonRoot = Split-Path -Parent (Split-Path -Parent $pythonPath)
+}
+
+$pybind11Path = Join-Path $pythonRoot "share\cmake\pybind11"
+if (-not (Test-Path $pybind11Path)) {
+    Write-Host "pybind11 not found in Python installation. Installing..." -ForegroundColor Yellow
+    python -m pip install pybind11
+}
+
 $cmakeArgs = @(
     '-G', '"Visual Studio 17 2022"',
     '-A', 'x64',
+    '-DBUILD_TESTING=OFF',
+    '-DCMAKE_CONFIGURATION_TYPES="Debug;Release;MinSizeRel;RelWithDebInfo"',
+    "-DCMAKE_INSTALL_PREFIX=`"$InstallPath`"",
+    "-Dpybind11_DIR=`"$pybind11Path`"",
     '..'
 )
 cmake @cmakeArgs

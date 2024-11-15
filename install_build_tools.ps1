@@ -24,7 +24,7 @@ $minCMakeVersion = "3.28.0"
 
 # Check and install Git if needed
 try {
-    $currentGitVersion = (git --version) -replace 'git version '
+    $currentGitVersion = (git --version).Replace('git version ', '')
     if (Compare-Versions -current $currentGitVersion -required $minGitVersion) {
         Write-Host "Git $currentGitVersion is already installed and meets minimum version requirement." -ForegroundColor Green
     } else {
@@ -141,14 +141,14 @@ if (-not $vsInstalled) {
         Write-Host "Visual Studio Build Tools installation completed successfully" -ForegroundColor Green
         
         # Add to PATH if not already present
-        $vsPath = Join-Path $vsInstallPath "Common7\Tools"
-        if ($env:Path -notlike "*$vsPath*") {
-            [Environment]::SetEnvironmentVariable(
-                'Path',
-                "$([Environment]::GetEnvironmentVariable('Path', 'Machine'));$vsPath",
-                'Machine'
-            )
-        }
+        # $vsPath = Join-Path $vsInstallPath "Common7\Tools"
+        # if ($env:Path -notlike "*$vsPath*") {
+        #     [Environment]::SetEnvironmentVariable(
+        #         'Path',
+        #         "$([Environment]::GetEnvironmentVariable('Path', 'Machine'));$vsPath",
+        #         'Machine'
+        #     )
+        # }
     } else {
         Write-Host "Visual Studio Build Tools installation completed with exit code: $($process.ExitCode)" -ForegroundColor Yellow
         Write-Host "This is normal if installation requires a reboot or if Build Tools are already installed." -ForegroundColor Yellow
