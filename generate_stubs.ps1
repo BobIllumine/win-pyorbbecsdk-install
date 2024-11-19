@@ -6,4 +6,4 @@ Write-Host "Installing pybind11-stubgen..." -ForegroundColor Cyan
 pip install pybind11-stubgen
 
 Write-Host "Generating stubs..." -ForegroundColor Cyan
-pybind11-stubgen setup.py -o ($INSTALL_PATH + "\stubs")
+pybind11-stubgen pyorbbecsdk -o ($INSTALL_PATH + "\stubs")
