@@ -182,5 +182,7 @@ try {
     Write-Host "CMake verification failed. You may need to restart your terminal." -ForegroundColor Red
 }
 
+
+Set-Location -Path $PWD.Path
 Write-Host "`nNote: You may need to restart your terminal or computer for all PATH changes to take effect." -ForegroundColor Yellow
 
