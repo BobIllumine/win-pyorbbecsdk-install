@@ -55,11 +55,11 @@ cmake --build . --config Release
 Write-Host "Installing built package..." -ForegroundColor Cyan
 cmake --build . --target INSTALL --config Release
 
+# Build and install wheel
 Write-Host "Building wheel..." -ForegroundColor Cyan
 Set-Location -Path $InstallPath
 pip install wheel
 python setup.py bdist_wheel
-
 
 # Copy necessary files to dist directory
 Write-Host "Copying files to dist directory..." -ForegroundColor Cyan
@@ -67,8 +67,16 @@ if (Test-Path "install/lib") {
     Copy-Item -Path "install/lib/*" -Destination "dist/" -Recurse -Force
 }
 
+# Get the wheel file name and install it
 Write-Host "Installing wheel..." -ForegroundColor Cyan
-python -m pip install dist/*.whl
+$wheelFile = Get-ChildItem -Path "dist" -Filter "*.whl" | Select-Object -First 1
+if ($wheelFile) {
+    pip install $wheelFile.FullName
+    Write-Host "Wheel installed successfully: $($wheelFile.Name)" -ForegroundColor Green
+} else {
+    Write-Host "No wheel file found in dist directory" -ForegroundColor Red
+    exit 1
+}
 
 Write-Host "`n `pyorbbecsdk` installed. You can now run examples from the 'examples' directory." -ForegroundColor Green
 Write-Host "Example command: python examples/color_viewer.py" -ForegroundColor Yellow
