@@ -1,5 +1,5 @@
 # Get the directory where the script is located
-$CURR_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
+$INSTALL_PATH = Join-Path $PWD.Path "pyorbbecsdk"
 
 # Add the install/lib directory to PYTHONPATH
-$env:PYTHONPATH = "$CURR_DIR\install\lib;$env:PYTHONPATH"
+$env:PYTHONPATH = "$INSTALL_PATH\install\lib;$env:PYTHONPATH"
