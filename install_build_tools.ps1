@@ -183,6 +183,6 @@ try {
 }
 
 
-Set-Location -Path $PWD.Path
+Set-Location -Path '..'
 Write-Host "`nNote: You may need to restart your terminal or computer for all PATH changes to take effect." -ForegroundColor Yellow
 
